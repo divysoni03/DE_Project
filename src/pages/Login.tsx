@@ -54,16 +54,18 @@ export default function Login() {
         }
       } else {
         // Register flow
+        // For demo purposes, auto-assign admin role if 'admin' is in the email
+        const userRole = email.toLowerCase().includes('admin') ? 'admin' : 'citizen';
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password, role: 'citizen' }),
+          body: JSON.stringify({ name, email, password, role: userRole }),
         });
 
         if (res.ok) {
           // Auto-login after registration
-          login('citizen', email);
-          navigate('/citizen/dashboard');
+          login(userRole, email);
+          navigate(userRole === 'admin' ? '/admin/dashboard' : '/citizen/dashboard');
         } else {
           const data = await res.json().catch(() => ({}));
           setError(data.message || 'Registration failed. This email may already be in use.');
