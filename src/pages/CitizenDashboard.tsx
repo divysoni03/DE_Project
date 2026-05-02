@@ -40,7 +40,7 @@ export default function CitizenDashboard() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        (err) => console.log("Geolocation error, using fallback location"),
+        (_err) => console.log("Geolocation error, using fallback location"),
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     }

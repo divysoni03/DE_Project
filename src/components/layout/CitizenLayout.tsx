@@ -1,4 +1,3 @@
-import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Home as HomeIcon, Map as MapIcon, Bell, Shield, LogOut, FileText } from 'lucide-react';

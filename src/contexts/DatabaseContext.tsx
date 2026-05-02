@@ -186,7 +186,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('reports_db', JSON.stringify(reports));
   }, [reports]);
   const [teams, setTeams] = useState<RescueTeam[]>(INITIAL_TEAMS);
-  const [shelters, setShelters] = useState<Shelter[]>(INITIAL_SHELTERS);
+  const [shelters, _setShelters] = useState<Shelter[]>(INITIAL_SHELTERS);
 
   // Load reports from Spring Boot backend (if running)
   useEffect(() => {

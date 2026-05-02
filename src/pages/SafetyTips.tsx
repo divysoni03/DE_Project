@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Shield, Droplet, Flame, Zap, CheckCircle2 } from 'lucide-react';
 
 export default function SafetyTips() {
