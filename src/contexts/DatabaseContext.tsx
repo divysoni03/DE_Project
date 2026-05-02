@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 // Bump this whenever the data schema changes — forces a cache clear on first load
-const SCHEMA_VERSION = '5';
+const SCHEMA_VERSION = '6';
 
 // *** Synchronous cache invalidation — runs before any component mounts ***
 (function clearStaleCache() {
@@ -10,6 +10,7 @@ const SCHEMA_VERSION = '5';
     if (localStorage.getItem('schema_version') !== SCHEMA_VERSION) {
       localStorage.removeItem('disasters_db');
       localStorage.removeItem('reports_db');
+      localStorage.removeItem('shelters_db');
       localStorage.setItem('schema_version', SCHEMA_VERSION);
     }
   } catch { /* ignore in SSR or restricted environments */ }
@@ -122,6 +123,8 @@ interface DatabaseContextType {
   addTeam: (team: Omit<RescueTeam, 'id'>) => void;
   removeTeam: (teamId: string) => void;
   updateTeamStatus: (teamId: string, status: RescueTeam['status']) => void;
+  addShelter: (shelter: Omit<Shelter, 'id'>) => void;
+  removeShelter: (shelterId: string) => void;
 }
 
 const DatabaseContext = createContext<DatabaseContextType | undefined>(undefined);
@@ -133,6 +136,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     if (storedVersion !== SCHEMA_VERSION) {
       localStorage.removeItem('disasters_db');
       localStorage.removeItem('reports_db');
+      localStorage.removeItem('shelters_db');
       localStorage.setItem('schema_version', SCHEMA_VERSION);
       console.log('Schema updated — cache cleared');
     }
@@ -186,7 +190,23 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('reports_db', JSON.stringify(reports));
   }, [reports]);
   const [teams, setTeams] = useState<RescueTeam[]>(INITIAL_TEAMS);
-  const [shelters, _setShelters] = useState<Shelter[]>(INITIAL_SHELTERS);
+
+  const [shelters, setShelters] = useState<Shelter[]>(() => {
+    try {
+      const saved = localStorage.getItem('shelters_db');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && localStorage.getItem('schema_version') === SCHEMA_VERSION) {
+          return parsed;
+        }
+      }
+    } catch { /* ignore */ }
+    return INITIAL_SHELTERS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('shelters_db', JSON.stringify(shelters));
+  }, [shelters]);
 
   // Load reports from Spring Boot backend (if running)
   useEffect(() => {
@@ -269,11 +289,20 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     setTeams(prev => prev.map(t => t.id === teamId ? { ...t, status } : t));
   };
 
+  const addShelter = (shelter: Omit<Shelter, 'id'>) => {
+    setShelters(prev => [...prev, { ...shelter, id: `s${Date.now()}` }]);
+  };
+
+  const removeShelter = (shelterId: string) => {
+    setShelters(prev => prev.filter(s => s.id !== shelterId));
+  };
+
   return (
     <DatabaseContext.Provider value={{
       disasters, reports, teams, shelters,
       addReport, addDisaster, updateReportStatus, assignTeam,
-      recallTeam, addTeam, removeTeam, updateTeamStatus
+      recallTeam, addTeam, removeTeam, updateTeamStatus,
+      addShelter, removeShelter
     }}>
       {children}
     </DatabaseContext.Provider>

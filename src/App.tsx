@@ -12,6 +12,7 @@ import Alerts from './pages/Alerts';
 
 import AdminDashboard from './pages/AdminDashboard';
 import RescueTeams from './pages/RescueTeams';
+import AdminShelters from './pages/AdminShelters';
 import { useAuth } from './contexts/AuthContext';
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
       <Route path="/admin" element={<AdminLayout />}>
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="teams"     element={<RescueTeams />} />
+        <Route path="shelters"  element={<AdminShelters />} />
       </Route>
     </Routes>
   );
