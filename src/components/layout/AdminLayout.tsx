@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { ShieldAlert, LogOut, LayoutDashboard, Users, Building2 } from 'lucide-react';
+import { ShieldAlert, LogOut, LayoutDashboard, Users, Building2, ShieldCheck } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 export default function AdminLayout() {
@@ -25,6 +25,7 @@ export default function AdminLayout() {
     { path: '/admin/dashboard', label: 'Command Center', icon: LayoutDashboard },
     { path: '/admin/teams',     label: 'Rescue Teams',  icon: Users },
     { path: '/admin/shelters',  label: 'Shelters',      icon: Building2 },
+    { path: '/admin/users',     label: 'Users',         icon: ShieldCheck },
   ];
 
   return (
