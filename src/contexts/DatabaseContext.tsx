@@ -264,8 +264,19 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     setDisasters(prev => [{ ...disaster, id: `d${Date.now()}`, timestamp: new Date().toISOString() }, ...prev]);
   };
 
-  const updateReportStatus = (id: string, status: Report['status']) => {
+  const updateReportStatus = async (id: string, status: Report['status']) => {
+    // Optimistic update — instant UI feedback
     setReports(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+    // Persist to DB
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/data/reports/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+    } catch {
+      console.warn('Could not persist report status to backend — update is local only.');
+    }
   };
 
   const assignTeam = (teamId: string, reportId: string) => {

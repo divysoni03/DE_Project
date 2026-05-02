@@ -32,4 +32,17 @@ public class DataController {
         reportRepository.save(report);
         return ResponseEntity.ok(Map.of("message", "Report stored successfully in database", "id", report.getId()));
     }
+
+    @PatchMapping("/reports/{id}/status")
+    public ResponseEntity<?> updateReportStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String newStatus = body.get("status");
+        return reportRepository.findById(id)
+            .map(report -> {
+                report.setStatus(newStatus);
+                reportRepository.save(report);
+                return ResponseEntity.ok(Map.of("message", "Status updated", "id", id, "status", newStatus));
+            })
+            .orElse(ResponseEntity.badRequest().body(Map.of("message", "Report not found")));
+    }
 }
+

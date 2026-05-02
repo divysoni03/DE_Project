@@ -55,25 +55,20 @@ export default function AdminDashboard() {
   // Panic Modal State
   const [showPanicModal, setShowPanicModal] = useState(false);
   const [panicLocation, setPanicLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const shownPanicIds = useRef<Set<string>>(new Set());
 
-  // Persist acknowledged panics across sessions using localStorage
-  const acknowledgedPanics = useRef<Set<string>>(
-    new Set(JSON.parse(localStorage.getItem('acknowledged_panics') ?? '[]'))
-  );
-  const markPanicAcknowledged = (id: string) => {
-    acknowledgedPanics.current.add(id);
-    localStorage.setItem('acknowledged_panics', JSON.stringify([...acknowledgedPanics.current]));
-  };
-
-  // Map fly-to target — changed when admin clicks Locate or Acknowledges a panic
+  // Map fly-to target
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
+    // Only show panic modal for reports that are STILL Pending in the DB
     const latest = pendingReports.find(
-      r => r.description.includes('Automated Panic Button Triggered') && !acknowledgedPanics.current.has(r.id)
+      r => r.description.includes('Automated Panic Button Triggered')
+        && r.status === 'Pending'
+        && !shownPanicIds.current.has(r.id)
     );
     if (latest) {
-      markPanicAcknowledged(latest.id);
+      shownPanicIds.current.add(latest.id);
       setPanicLocation(latest.location ?? null);
       setShowPanicModal(true);
     }
@@ -82,7 +77,7 @@ export default function AdminDashboard() {
   const handleAcknowledge = () => {
     setShowPanicModal(false);
     if (panicLocation) {
-      setFlyTarget({ ...panicLocation }); // new object reference so useEffect re-fires
+      setFlyTarget({ ...panicLocation });
     }
   };
 
