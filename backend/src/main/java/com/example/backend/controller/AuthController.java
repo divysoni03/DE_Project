@@ -22,9 +22,10 @@ public class AuthController {
         String password = credentials.get("password");
 
         return userRepository.findByEmail(email)
-            .filter(user -> user.getPassword().equals(password))
-            .map(user -> ResponseEntity.ok(Map.of("message", "Login successful", "role", user.getRole(), "userId", user.getId())))
-            .orElse(ResponseEntity.status(401).body(Map.of("message", "Invalid credentials")));
+                .filter(user -> user.getPassword().equals(password))
+                .map(user -> ResponseEntity
+                        .ok(Map.of("message", "Login successful", "role", user.getRole(), "userId", user.getId())))
+                .orElse(ResponseEntity.status(401).body(Map.of("message", "Invalid credentials")));
     }
 
     @PostMapping("/register")
