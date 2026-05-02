@@ -30,10 +30,23 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+        if (userRepository.findFirstByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Email already in use"));
         }
         userRepository.save(user);
         return ResponseEntity.ok(Map.of("message", "User registered successfully"));
+    }
+
+    @PostMapping("/reset")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String newPassword = body.get("newPassword");
+        return userRepository.findFirstByEmail(email)
+            .map(user -> {
+                user.setPassword(newPassword);
+                userRepository.save(user);
+                return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
+            })
+            .orElse(ResponseEntity.badRequest().body(Map.of("message", "Email not found")));
     }
 }
