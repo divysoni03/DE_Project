@@ -45,12 +45,15 @@ export default function Login() {
 
         if (res.ok) {
           const data = await res.json();
-          const role = data.role === 'admin' ? 'admin' : 'citizen';
-          login(role, email);
-          navigate(role === 'admin' ? '/admin/dashboard' : '/citizen/dashboard');
+          login(data.role || 'citizen', email);
+          navigate(data.role === 'admin' ? '/admin/dashboard' : '/citizen/dashboard');
         } else {
           const data = await res.json().catch(() => ({}));
-          setError(data.message || 'Invalid email or password. Please try again.');
+          if (res.status >= 500) {
+            setError('The backend server is down or crashing (Status ' + res.status + '). Please check your Railway deployment logs.');
+          } else {
+            setError(data.message || 'Invalid email or password. Please try again.');
+          }
         }
       } else {
         // Register flow
@@ -66,7 +69,11 @@ export default function Login() {
           navigate('/citizen/dashboard');
         } else {
           const data = await res.json().catch(() => ({}));
-          setError(data.message || 'Registration failed. This email may already be in use.');
+          if (res.status >= 500) {
+            setError('The backend server is down or crashing (Status ' + res.status + '). Please check your Railway deployment logs.');
+          } else {
+            setError(data.message || 'Registration failed. This email may already be in use.');
+          }
         }
       }
     } catch {
