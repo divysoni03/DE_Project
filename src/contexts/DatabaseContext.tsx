@@ -190,7 +190,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
 
   // Load reports from Spring Boot backend (if running)
   useEffect(() => {
-    fetch('http://localhost:8080/api/data/reports')
+    fetch(`${import.meta.env.VITE_API_URL}/api/data/reports`)
       .then(res => res.json())
       .then(data => {
         if (data && Array.isArray(data) && data.length > 0) {
@@ -223,7 +223,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
 
     // 2. Persist to real Spring Boot Backend Database
     try {
-      await fetch('http://localhost:8080/api/data/reports', {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/data/reports`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
