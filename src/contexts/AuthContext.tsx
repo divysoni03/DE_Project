@@ -5,34 +5,39 @@ export type UserRole = 'citizen' | 'admin' | null;
 
 interface AuthContextType {
   role: UserRole;
-  login: (role: UserRole) => void;
+  email: string | null;
+  login: (role: UserRole, email?: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Initialize from localStorage to survive page refreshes
   const [role, setRole] = useState<UserRole>(() => {
     const saved = localStorage.getItem('disaster_portal_role');
-    console.log("Auth Restored from Local Storage:", saved);
     return (saved as UserRole) || null;
   });
 
-  const login = (newRole: UserRole) => {
+  const [email, setEmail] = useState<string | null>(() =>
+    localStorage.getItem('disaster_portal_email') || null
+  );
+
+  const login = (newRole: UserRole, userEmail?: string) => {
     setRole(newRole);
-    if (newRole) {
-      localStorage.setItem('disaster_portal_role', newRole);
-    }
+    setEmail(userEmail ?? null);
+    if (newRole) localStorage.setItem('disaster_portal_role', newRole);
+    if (userEmail) localStorage.setItem('disaster_portal_email', userEmail);
   };
 
   const logout = () => {
     setRole(null);
+    setEmail(null);
     localStorage.removeItem('disaster_portal_role');
+    localStorage.removeItem('disaster_portal_email');
   };
 
   return (
-    <AuthContext.Provider value={{ role, login, logout }}>
+    <AuthContext.Provider value={{ role, email, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

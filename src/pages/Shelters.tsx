@@ -44,31 +44,31 @@ interface Shelter {
 const shelters: Shelter[] = [
     {
         id: 1,
-        name: 'Community Center Shelter',
-        address: '123 Main St, New York, NY',
-        capacity: 100,
-        occupancy: 45,
-        lat: 40.7128,
-        lng: -74.0060,
+        name: 'Sardar Patel Relief Center',
+        address: 'Sabarmati Riverfront, Ahmedabad, GJ',
+        capacity: 500,
+        occupancy: 120,
+        lat: 23.0235,
+        lng: 72.5724,
     },
     {
         id: 2,
-        name: 'School Gymnasium',
-        address: '456 Park Ave, New York, NY',
-        capacity: 200,
-        occupancy: 120,
-        lat: 40.7200,
-        lng: -73.9900,
+        name: 'Navrangpura High School Gym',
+        address: 'Navrangpura, Ahmedabad, GJ',
+        capacity: 1000,
+        occupancy: 850,
+        lat: 23.0335,
+        lng: 72.5624,
     },
     {
         id: 3,
-        name: 'Downtown Library',
-        address: '789 Broadway, New York, NY',
-        capacity: 150,
-        occupancy: 140,
-        lat: 40.7300,
-        lng: -73.9950,
-    }
+        name: 'Maninagar Community Hall',
+        address: 'Maninagar, Ahmedabad, GJ',
+        capacity: 300,
+        occupancy: 80,
+        lat: 22.9980,
+        lng: 72.5950,
+    },
 ];
 
 // Haversine formula
@@ -96,7 +96,7 @@ function MapUpdater({ center }: { center: [number, number] }) {
 export default function Shelters() {
     const [userLoc, setUserLoc] = useState<[number, number] | null>(null);
     const [nearestShelter, setNearestShelter] = useState<number | null>(null);
-    const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]);
+    const [mapCenter, setMapCenter] = useState<[number, number]>([23.0225, 72.5714]);
     const [loadingLoc, setLoadingLoc] = useState(false);
     const [routes, setRoutes] = useState<Record<number, [number, number][]>>({});
 

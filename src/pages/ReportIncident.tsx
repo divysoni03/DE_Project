@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useDatabase } from '../contexts/DatabaseContext';
+import { useAuth } from '../contexts/AuthContext';
 import { UploadCloud, LocateFixed, Send, CheckCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function ReportIncident() {
   const { addReport } = useDatabase();
+  const { email } = useAuth();
   const navigate = useNavigate();
   
   const [description, setDescription] = useState('');
@@ -46,13 +48,15 @@ export default function ReportIncident() {
     }
   };
 
+  const MIN_DESC = 10;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!gpsCoords) return;
+    if (!gpsCoords || description.trim().length < MIN_DESC) return;
     setLoading(true);
     setTimeout(() => {
       addReport({
-        citizenId: 'c1',
+        citizenId: email ?? `citizen_${Date.now()}`,
         description,
         location: gpsCoords,
         status: 'Pending'
@@ -74,15 +78,30 @@ export default function ReportIncident() {
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700">Incident Description <span className="text-red-500">*</span></label>
-            <textarea 
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-bold text-slate-700">Incident Description <span className="text-red-500">*</span></label>
+              <span className={`text-xs font-medium ${
+                description.trim().length < MIN_DESC ? 'text-red-400' : 'text-emerald-600'
+              }`}>
+                {description.trim().length}/{MIN_DESC} min
+              </span>
+            </div>
+            <textarea
               required
+              minLength={MIN_DESC}
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe what you see clearly (e.g. Water level is chest high, tree fallen on road)"
-              className="w-full rounded-xl border-slate-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all p-3 border"
+              className={`w-full rounded-xl shadow-sm focus:ring focus:ring-blue-200 transition-all p-3 border ${
+                description.trim().length > 0 && description.trim().length < MIN_DESC
+                  ? 'border-red-400 focus:border-red-400'
+                  : 'border-slate-300 focus:border-blue-500'
+              }`}
             />
+            {description.trim().length > 0 && description.trim().length < MIN_DESC && (
+              <p className="text-xs text-red-500">Please provide at least {MIN_DESC} characters.</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -130,7 +149,7 @@ export default function ReportIncident() {
           <div className="pt-4">
             <button 
               type="submit" 
-              disabled={loading || !gpsCoords}
+              disabled={loading || !gpsCoords || description.trim().length < MIN_DESC}
               className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white p-4 rounded-xl font-bold transition-all shadow-lg active:scale-[0.98]"
             >
               {loading ? (
