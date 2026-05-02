@@ -55,7 +55,15 @@ export default function AdminDashboard() {
   // Panic Modal State
   const [showPanicModal, setShowPanicModal] = useState(false);
   const [panicLocation, setPanicLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const acknowledgedPanics = useRef<Set<string>>(new Set());
+
+  // Persist acknowledged panics across sessions using localStorage
+  const acknowledgedPanics = useRef<Set<string>>(
+    new Set(JSON.parse(localStorage.getItem('acknowledged_panics') ?? '[]'))
+  );
+  const markPanicAcknowledged = (id: string) => {
+    acknowledgedPanics.current.add(id);
+    localStorage.setItem('acknowledged_panics', JSON.stringify([...acknowledgedPanics.current]));
+  };
 
   // Map fly-to target — changed when admin clicks Locate or Acknowledges a panic
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number } | null>(null);
@@ -65,7 +73,7 @@ export default function AdminDashboard() {
       r => r.description.includes('Automated Panic Button Triggered') && !acknowledgedPanics.current.has(r.id)
     );
     if (latest) {
-      acknowledgedPanics.current.add(latest.id);
+      markPanicAcknowledged(latest.id);
       setPanicLocation(latest.location ?? null);
       setShowPanicModal(true);
     }
@@ -350,9 +358,14 @@ export default function AdminDashboard() {
                         </button>
                         <button
                           onClick={() => updateReportStatus(report.id, 'Reviewed')}
-                          className="px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 rounded transition-colors shrink-0"
+                          className={`px-3 py-1.5 text-sm rounded transition-colors shrink-0 flex items-center gap-1 ${
+                            report.status === 'Reviewed' || report.status === 'Action Taken'
+                              ? 'bg-emerald-800 text-emerald-300 cursor-default'
+                              : 'bg-slate-700 hover:bg-slate-600'
+                          }`}
+                          disabled={report.status === 'Reviewed' || report.status === 'Action Taken'}
                         >
-                          Mark Read
+                          {report.status === 'Reviewed' || report.status === 'Action Taken' ? '✓ Read' : 'Mark Read'}
                         </button>
                         <button
                           onClick={() => {
