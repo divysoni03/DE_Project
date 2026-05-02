@@ -10,6 +10,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   const [mode, setMode]         = useState<Mode>('login');
+  const [registerRole, setRegisterRole] = useState<'citizen' | 'admin'>('citizen');
   const [name, setName]         = useState('');
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
@@ -54,18 +55,16 @@ export default function Login() {
         }
       } else {
         // Register flow
-        // For demo purposes, auto-assign admin role if 'admin' is in the email
-        const userRole = email.toLowerCase().includes('admin') ? 'admin' : 'citizen';
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password, role: userRole }),
+          body: JSON.stringify({ name, email, password, role: registerRole }),
         });
 
         if (res.ok) {
           // Auto-login after registration
-          login(userRole, email);
-          navigate(userRole === 'admin' ? '/admin/dashboard' : '/citizen/dashboard');
+          login(registerRole, email);
+          navigate(registerRole === 'admin' ? '/admin/dashboard' : '/citizen/dashboard');
         } else {
           const data = await res.json().catch(() => ({}));
           setError(data.message || 'Registration failed. This email may already be in use.');
@@ -82,6 +81,7 @@ export default function Login() {
     setMode(m);
     setError('');
     setPwdError('');
+    setRegisterRole('citizen');
     setName('');
     setEmail('');
     setPassword('');
@@ -140,6 +140,37 @@ export default function Login() {
                   placeholder="Your full name"
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                 />
+              </div>
+            </div>
+          )}
+
+          {/* Role Selection — register only */}
+          {mode === 'register' && (
+            <div className="space-y-2 pb-1">
+              <label className="text-sm font-medium text-slate-300 ml-1">Account Type</label>
+              <div className="flex gap-4 ml-1">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="citizen"
+                    checked={registerRole === 'citizen'}
+                    onChange={() => setRegisterRole('citizen')}
+                    className="w-4 h-4 text-blue-600 bg-slate-900 border-slate-700 focus:ring-blue-500 focus:ring-1"
+                  />
+                  <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Citizen</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="admin"
+                    checked={registerRole === 'admin'}
+                    onChange={() => setRegisterRole('admin')}
+                    className="w-4 h-4 text-blue-600 bg-slate-900 border-slate-700 focus:ring-blue-500 focus:ring-1"
+                  />
+                  <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Administrator</span>
+                </label>
               </div>
             </div>
           )}
